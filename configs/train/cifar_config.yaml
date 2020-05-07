@@ -1,0 +1,76 @@
+main:
+    random_seed: '8512'
+    saved_dir: '/home/tony/Mango/models/cifar_res50/train'
+
+dataset:
+    name: 'CIFARDataset'
+    kwargs:
+        data_dir: '/home/tony/datasets/CIFAR_preprocessed'
+        csv_name: 'CIFAR_split.csv'
+        transforms:
+            - name: 'Normalize'
+        augments:
+
+
+dataloader:
+    name: 'Dataloader'
+    kwargs:
+        train:
+            batch_size: 1024
+        valid:
+            batch_size: 256
+        shuffle: true
+        num_workers: 8
+
+net:
+    name: 'ResNet50'
+    kwargs:
+      num_classes: 100
+      pretrained: True
+        
+
+losses:
+    - name: 'CrossEntropyLossWrapper'
+      weight: 1.0
+
+metrics:
+    - name: 'Accuracy'
+
+optimizer:
+    # name: 'Adam'
+    # kwargs:
+    #     lr: 0.1
+    #     weight_decay: 0
+    #     amsgrad: false
+    name: 'SGD'
+    kwargs:
+        lr: 0.1
+        momentum: 0.9
+        weight_decay: 0.0005
+
+lr_scheduler:
+    name: 'MultiStepLR'
+    kwargs:
+        milestones: [2, 120, 160]
+        gamma: 0.1
+
+logger:
+    name: 'MangoLogger'
+    kwargs:
+        dummy_input: [16, 1, 256, 256]
+
+monitor:
+    name: 'Monitor'
+    kwargs:
+        mode: 'max'
+        target: 'Accuracy'
+        saved_freq: 50
+        early_stop: 0
+
+trainer:
+    name: 'MangoTrainer'
+    kwargs:
+        device: 'cuda:0'
+        num_epochs: 200
+        freeze_param: true
+        unfreeze_epoch: 2
