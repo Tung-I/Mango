@@ -1,6 +1,6 @@
 main:
     random_seed: '8512'
-    saved_dir: '/home/tony/Mango/models/resnet50/train'
+    saved_dir: '/home/tony/Mango/models/resnet50_unfreeze10/train'
 
 dataset:
     name: 'MangoDataset'
@@ -18,9 +18,9 @@ dataloader:
     name: 'Dataloader'
     kwargs:
         train:
-            batch_size: 32
+            batch_size: 4
         valid:
-            batch_size: 8
+            batch_size: 2
         shuffle: true
         num_workers: 8
 
@@ -39,17 +39,22 @@ metrics:
     - name: 'Accuracy'
 
 optimizer:
-    name: 'Adam'
+    # name: 'Adam'
+    # kwargs:
+    #     lr: 0.1
+    #     weight_decay: 0
+    #     amsgrad: false
+    name: 'SGD'
     kwargs:
         lr: 0.01
-        weight_decay: 0
-        amsgrad: false
+        momentum: 0.9
+        weight_decay: 0.0005
 
 lr_scheduler:
     name: 'MultiStepLR'
     kwargs:
-        milestones: [10, 30]
-        gamma: 0.2
+        milestones: [10, 100]
+        gamma: 0.1
 
 logger:
     name: 'MangoLogger'
@@ -69,3 +74,5 @@ trainer:
     kwargs:
         device: 'cuda:0'
         num_epochs: 200
+        freeze_param: True
+        unfreeze_epoch: 10
