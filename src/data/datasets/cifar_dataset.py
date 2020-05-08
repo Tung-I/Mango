@@ -1,6 +1,5 @@
 import re
 import numpy as np
-import pandas as pd
 import csv
 import torch
 from pathlib import Path
