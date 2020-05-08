@@ -1,5 +1,4 @@
 import re
-import nibabel as nib
 import numpy as np
 import pandas as pd
 import csv
