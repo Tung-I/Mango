@@ -11,7 +11,7 @@ dataset:
         transforms:
             - name: 'Normalize'
         augments:
-        resize: 64
+        resize: 512
 
 
 dataloader:
@@ -66,7 +66,7 @@ monitor:
     kwargs:
         mode: 'max'
         target: 'Accuracy'
-        saved_freq: 10
+        saved_freq: 20
         early_stop: 0
 
 trainer:
