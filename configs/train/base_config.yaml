@@ -1,26 +1,26 @@
 main:
     random_seed: '8512'
-    saved_dir: '/home/tony/Mango/models/resnet50_unfreeze10/train'
+    saved_dir: '/home/tungi893610/Mango/models/no_pretrain_lr01/train'
 
 dataset:
     name: 'MangoDataset'
     kwargs:
-        data_dir: "/home/tony/datasets/Mango/traindev"
-        train_data_csv: "/home/tony/datasets/Mango/train.csv"
-        valid_data_csv: "/home/tony/datasets/Mango/dev.csv"
+        data_dir: "/work/tungi893610/Mango/traindev"
+        train_data_csv: "/work/tungi893610/Mango/train.csv"
+        valid_data_csv: "/work/tungi893610/Mango/dev.csv"
         transforms:
             - name: 'Normalize'
         augments:
-        resize: 512
+        resize: 64
 
 
 dataloader:
     name: 'Dataloader'
     kwargs:
         train:
-            batch_size: 4
+            batch_size: 8
         valid:
-            batch_size: 2
+            batch_size: 4
         shuffle: true
         num_workers: 8
 
@@ -28,7 +28,7 @@ net:
     name: 'ResNet50'
     kwargs:
       num_classes: 3
-      pretrained: True
+      pretrained: False
         
 
 losses:
@@ -46,14 +46,14 @@ optimizer:
     #     amsgrad: false
     name: 'SGD'
     kwargs:
-        lr: 0.01
+        lr: 0.1
         momentum: 0.9
         weight_decay: 0.0005
 
 lr_scheduler:
     name: 'MultiStepLR'
     kwargs:
-        milestones: [10, 100]
+        milestones: [30, 60]
         gamma: 0.1
 
 logger:
@@ -73,6 +73,6 @@ trainer:
     name: 'MangoTrainer'
     kwargs:
         device: 'cuda:0'
-        num_epochs: 200
-        freeze_param: True
-        unfreeze_epoch: 10
+        num_epochs: 100
+        freeze_param: False
+        unfreeze_epoch: 1

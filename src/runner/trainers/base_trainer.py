@@ -111,6 +111,7 @@ class BaseTrainer:
             # unfreeze or not
             if self.freeze_param == True and self.epoch == self.unfreeze_epoch:
                 self.net._unfreeze()
+		self.freeze_param = False
                 
              # update epoch   
             self.epoch += 1
