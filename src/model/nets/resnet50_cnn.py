@@ -27,14 +27,14 @@ class ResNet50_CNN(nn.Module):
         self.conv4_x = self._make_layer(block, 256, num_block[2], 2)
         self.conv5_x = self._make_layer(block, 512, num_block[3], 2)
 
-        self.avg_pool = nn.AdaptiveAvgPool2d((32, 32))
         self.conv6_x_output = nn.Sequential(
-            nn.Conv2d(512, 128, kernel_size=3, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(128),
+            nn.Conv2d(512, 256, kernel_size=3, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(256),
             nn.ReLU(inplace=True),
         )
+        # self.avg_pool = nn.AdaptiveAvgPool2d((32, 32))
         self.conv7_x_output = nn.Sequential(
-            nn.Conv2d(128, 3, kernel_size=16, bias=False)
+            nn.Conv2d(256, 3, kernel_size=32, bias=False)
         )
 
         # self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
@@ -106,7 +106,7 @@ class ResNet50_CNN(nn.Module):
         output = self.conv3_x(output)
         output = self.conv4_x(output)
         output = self.conv5_x(output)
-        output = self.avg_pool(output)
+        # output = self.avg_pool(output)
         output = self.conv6_x_output(output)
         output = self.conv7_x_output(output)
         output = output.view(output.size(0), -1)
