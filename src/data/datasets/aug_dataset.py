@@ -21,7 +21,7 @@ def bgr2rgb(img_bgr):
     return np.concatenate((img_bgr[:, :, 2:], img_bgr[:, :, 1:2], img_bgr[:, :, 0:1]), axis=2) 
 
 
-class MangoDataset(BaseDataset):
+class AugDataset(BaseDataset):
     """The dataset of the Automated Cardiac Diagnosis Challenge (ACDC) in MICCAI 2017
     for the segmentation task.
     Ref: 
@@ -32,7 +32,7 @@ class MangoDataset(BaseDataset):
         augments (BoxList): The augmentation techniques applied to the training data (default: None).
     """
 
-    def __init__(self, data_dir, train_data_csv, valid_data_csv, transforms, resize, augments=None, **kwargs):
+    def __init__(self, data_dir, train_data_csv, valid_data_csv, transforms=None, resize=None, augments=None, **kwargs):
         super().__init__(**kwargs)
         self.data_paths = []
         class_type = {}
@@ -72,19 +72,21 @@ class MangoDataset(BaseDataset):
             torchTransform.Normalize(mean=[0.485, 0.456, 0.406],
                          std=[0.229, 0.224, 0.225])
         ])
-        self.resize = resize
+        
+        self.augments = Compose.compose(augments)
 
     def __getitem__(self, index):
         img_path, gt = self.data_paths[index]
         img_bgr = cv2.imread(img_path)
-        img_bgr = cv2.resize(img_bgr, (self.resize, self.resize), interpolation=cv2.INTER_CUBIC)
         img = bgr2rgb(img_bgr)
         gt = torch.as_tensor([gt]).long()
+
         if self.type == 'train':
             # transforms_kwargs = {}
             # img = self.transforms(img, **transforms_kwargs)
             # img = self.augments(img)
             # img = self.to_tensor(img)
+            img = self.augments(img)[0]
             img = self.transform_train(img)
         else:
             # img = self.transforms(img, **transforms_kwargs)
