@@ -40,9 +40,7 @@ class BasePredictor:
         for i, batch in enumerate(pbar):
             with torch.no_grad():
                 test_dict = self._test_step(batch)
-                loss = test_dict['loss']
-                losses = test_dict.get('losses')
-                metrics = test_dict.get('metrics')
+                cls_output = test_dict['cls_output']
 
             if (i + 1) == len(dataloader) and not dataloader.drop_last:
                 batch_size = len(dataloader.dataset) % dataloader.batch_size
@@ -53,6 +51,31 @@ class BasePredictor:
             pbar.set_postfix(**epoch_log.on_step_end_log)
         test_log = epoch_log.on_epoch_end_log
         LOGGER.info(f'Test log: {test_log}.')
+
+    # def predict(self):
+    #     """The testing process.
+    #     """
+    #     self.net.eval()
+    #     dataloader = self.test_dataloader
+    #     pbar = tqdm(dataloader, desc='test', ascii=True)
+
+    #     epoch_log = EpochLog()
+    #     for i, batch in enumerate(pbar):
+    #         with torch.no_grad():
+    #             test_dict = self._test_step(batch)
+    #             loss = test_dict['loss']
+    #             losses = test_dict.get('losses')
+    #             metrics = test_dict.get('metrics')
+
+    #         if (i + 1) == len(dataloader) and not dataloader.drop_last:
+    #             batch_size = len(dataloader.dataset) % dataloader.batch_size
+    #         else:
+    #             batch_size = dataloader.batch_size
+    #         epoch_log.update(batch_size, loss, losses, metrics)
+
+    #         pbar.set_postfix(**epoch_log.on_step_end_log)
+    #     test_log = epoch_log.on_epoch_end_log
+    #     LOGGER.info(f'Test log: {test_log}.')
 
     def _test_step(self, batch):
         """The user-defined testing logic.
