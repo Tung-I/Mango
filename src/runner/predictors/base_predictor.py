@@ -1,5 +1,6 @@
 import logging
 import torch
+import csv
 from tqdm import tqdm
 
 from src.runner.utils import EpochLog
@@ -19,15 +20,12 @@ class BasePredictor:
         metric_fns (MetricFns): The metric functions.
     """
 
-    def __init__(self, saved_dir, device, test_dataloader,
-                 net, loss_fns, loss_weights, metric_fns):
+    def __init__(self, saved_dir, device, test_dataloader, net, output_csv_path):
         self.saved_dir = saved_dir
         self.device = device
         self.test_dataloader = test_dataloader
         self.net = net.to(device)
-        self.loss_fns = loss_fns
-        self.loss_weights = loss_weights
-        self.metric_fns = metric_fns
+        self.output_csv_path = output_csv_path
 
     def predict(self):
         """The testing process.
@@ -36,46 +34,20 @@ class BasePredictor:
         dataloader = self.test_dataloader
         pbar = tqdm(dataloader, desc='test', ascii=True)
 
-        epoch_log = EpochLog()
+        predictions = []
         for i, batch in enumerate(pbar):
             with torch.no_grad():
                 test_dict = self._test_step(batch)
                 cls_output = test_dict['cls_output']
+                file_name = test_dict['file_name']
+                predictions.append((file_name, cls_output))
 
-            if (i + 1) == len(dataloader) and not dataloader.drop_last:
-                batch_size = len(dataloader.dataset) % dataloader.batch_size
-            else:
-                batch_size = dataloader.batch_size
-            epoch_log.update(batch_size, loss, losses, metrics)
-
-            pbar.set_postfix(**epoch_log.on_step_end_log)
-        test_log = epoch_log.on_epoch_end_log
-        LOGGER.info(f'Test log: {test_log}.')
-
-    # def predict(self):
-    #     """The testing process.
-    #     """
-    #     self.net.eval()
-    #     dataloader = self.test_dataloader
-    #     pbar = tqdm(dataloader, desc='test', ascii=True)
-
-    #     epoch_log = EpochLog()
-    #     for i, batch in enumerate(pbar):
-    #         with torch.no_grad():
-    #             test_dict = self._test_step(batch)
-    #             loss = test_dict['loss']
-    #             losses = test_dict.get('losses')
-    #             metrics = test_dict.get('metrics')
-
-    #         if (i + 1) == len(dataloader) and not dataloader.drop_last:
-    #             batch_size = len(dataloader.dataset) % dataloader.batch_size
-    #         else:
-    #             batch_size = dataloader.batch_size
-    #         epoch_log.update(batch_size, loss, losses, metrics)
-
-    #         pbar.set_postfix(**epoch_log.on_step_end_log)
-    #     test_log = epoch_log.on_epoch_end_log
-    #     LOGGER.info(f'Test log: {test_log}.')
+        with open(self.output_csv_path, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(['image_id', 'label'])
+            for i, item in enumerate(predictions):
+                file_name, pred = item
+                writer.writerow([file_name, pred])
 
     def _test_step(self, batch):
         """The user-defined testing logic.
